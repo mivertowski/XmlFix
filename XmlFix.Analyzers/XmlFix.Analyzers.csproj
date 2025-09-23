@@ -1,0 +1,44 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IncludeBuildOutput>false</IncludeBuildOutput>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <PackageId>XmlFix.Analyzers</PackageId>
+    <Version>1.0.0</Version>
+    <Authors>Michael Ivertowski</Authors>
+    <Company>XmlFix</Company>
+    <Copyright>Copyright © 2025 Michael Ivertowski</Copyright>
+    <PackageProjectUrl>https://github.com/mivertowski/XmlFix</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/mivertowski/XmlFix.git</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <Description>Advanced Roslyn analyzer and code fix provider for generating intelligent XML documentation comments in C# code. Features smart summarization, parameter detection, and bulk fixing capabilities.</Description>
+    <PackageTags>analyzers;roslyn;xml-documentation;codefix;documentation;c#;dotnet;code-quality</PackageTags>
+    <PackageReleaseNotes>Version 1.0.0: Initial release with advanced documentation generation, intelligent summarization, and comprehensive code fix support.</PackageReleaseNotes>
+    <DevelopmentDependency>true</DevelopmentDependency>
+    <NoPackageAnalysis>true</NoPackageAnalysis>
+    <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
+    <IsRoslynComponent>true</IsRoslynComponent>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.8.0" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="3.3.4" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.Common" Version="4.8.0" PrivateAssets="all" />
+    <PackageReference Include="System.Composition" Version="9.0.0" PrivateAssets="all" />
+  </ItemGroup>
+
+
+  <ItemGroup>
+    <None Update="tools\*.ps1" Pack="true" PackagePath="tools" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="$(OutputPath)\$(AssemblyName).dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,9 @@
+root = false
+
+[*.cs]
+# Suppress analyzer warnings for this analyzer project itself
+dotnet_diagnostic.CA1014.severity = none  # CLSCompliant
+dotnet_diagnostic.CA1308.severity = none  # ToLowerInvariant
+dotnet_diagnostic.CA1062.severity = none  # Null parameter validation
+dotnet_diagnostic.RS1036.severity = none  # EnforceExtendedAnalyzerRules
+dotnet_diagnostic.RS2008.severity = none  # Release tracking

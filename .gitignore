@@ -52,3 +52,73 @@ CodeCoverage/
 *.VisualState.xml
 TestResult.xml
 nunit-*.xml
+
+# JetBrains Rider
+.idea/
+*.sln.iml
+
+# Visual Studio Code
+.vscode/
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.code-workspace
+
+# Local History for Visual Studio Code
+.history/
+.ionide/
+
+# Windows Installer files
+*.cab
+*.msi
+*.msix
+*.msm
+*.msp
+
+# ReSharper is a .NET coding add-in
+_ReSharper*/
+*.[Rr]e[Ss]harper
+*.DotSettings.user
+
+# TeamCity is a build add-in
+_TeamCity*
+
+# DotCover is a Code Coverage Tool
+*.dotCover
+
+# AxoCover is a Code Coverage Tool
+.axoCover/*
+!.axoCover/settings.json
+
+# Coverlet is a free, cross platform Code Coverage Tool
+coverage*.json
+coverage*.xml
+coverage*.info
+
+# StyleCop
+StyleCopReport.xml
+
+# Benchmark.NET
+BenchmarkDotNet.Artifacts/
+
+# Ionide (cross platform F# VS Code tools) working folder
+.ionide/
+
+# Fody - auto-generated XML schema
+FodyWeavers.xsd
+
+# Analyzer specific ignores
+*.sarif
+*.editorconfig.bak
+StyleCop.Cache
+.claude-flow/metrics/agent-metrics.json
+.claude-flow/metrics/performance.json
+.claude-flow/metrics/system-metrics.json
+.claude-flow/metrics/task-metrics.json
+.hive-mind/hive.db
+.hive-mind/hive.db-shm
+.hive-mind/hive.db-wal
+.hive-mind/memory.db
+.hive-mind/sessions/hive-mind-prompt-swarm-1758633417883-cqh0etikd.txt
+.hive-mind/sessions/session-1758633417892-h6ogd20ns-auto-save-1758633447488.json
