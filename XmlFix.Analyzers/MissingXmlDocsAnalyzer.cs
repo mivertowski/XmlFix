@@ -78,8 +78,15 @@ public sealed class MissingXmlDocsAnalyzer : DiagnosticAnalyzer
             return;
         }
 
-        // Only document const fields, not regular fields
-        if (symbol is IFieldSymbol field && !field.IsConst)
+        // Skip non-const fields that are not public instance fields
+        if (symbol is IFieldSymbol field && !field.IsConst && field.IsStatic)
+        {
+            return;
+        }
+
+        // Skip property accessors - they are documented with the property itself
+        if (symbol is IMethodSymbol method &&
+            (method.MethodKind == MethodKind.PropertyGet || method.MethodKind == MethodKind.PropertySet))
         {
             return;
         }

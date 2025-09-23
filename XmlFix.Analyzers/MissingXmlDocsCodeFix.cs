@@ -87,6 +87,7 @@ public sealed class MissingXmlDocsCodeFix : CodeFixProvider
             n is BaseTypeDeclarationSyntax ||
             n is DelegateDeclarationSyntax ||
             n is BaseFieldDeclarationSyntax ||
+            n is EventFieldDeclarationSyntax ||
             n is EventDeclarationSyntax);
     }
 
@@ -170,9 +171,13 @@ public sealed class MissingXmlDocsCodeFix : CodeFixProvider
         var root = await document.GetSyntaxRootAsync(cancellationToken).ConfigureAwait(false);
         if (root == null) return document;
 
+        // Get the indentation from the declaration
+        var leadingTrivia = declaration.GetLeadingTrivia();
+        var indentation = GetIndentation(leadingTrivia);
+
         var documentationText = inheritDoc
-            ? GenerateInheritdocComment()
-            : GenerateXmlDocumentationStub(declaration, symbol);
+            ? GenerateInheritdocComment(indentation)
+            : GenerateXmlDocumentationStub(declaration, symbol, indentation);
 
         var documentationTrivia = SyntaxFactory.ParseLeadingTrivia(documentationText);
         var newDeclaration = declaration.WithLeadingTrivia(documentationTrivia.AddRange(declaration.GetLeadingTrivia()));
@@ -182,12 +187,34 @@ public sealed class MissingXmlDocsCodeFix : CodeFixProvider
     }
 
     /// <summary>
+    /// Gets the indentation from the leading trivia.
+    /// </summary>
+    /// <param name="leadingTrivia">The leading trivia of the declaration.</param>
+    /// <returns>The indentation string.</returns>
+    private static string GetIndentation(SyntaxTriviaList leadingTrivia)
+    {
+        foreach (var trivia in leadingTrivia.Reverse())
+        {
+            if (trivia.IsKind(SyntaxKind.WhitespaceTrivia))
+            {
+                return trivia.ToString();
+            }
+            if (trivia.IsKind(SyntaxKind.EndOfLineTrivia))
+            {
+                break;
+            }
+        }
+        return string.Empty;
+    }
+
+    /// <summary>
     /// Generates an inheritdoc comment.
     /// </summary>
+    /// <param name="indentation">The indentation to use.</param>
     /// <returns>The inheritdoc comment text.</returns>
-    private static string GenerateInheritdocComment()
+    private static string GenerateInheritdocComment(string indentation)
     {
-        return "/// <inheritdoc/>\n";
+        return $"{indentation}/// <inheritdoc/>\n";
     }
 
     /// <summary>
@@ -195,30 +222,31 @@ public sealed class MissingXmlDocsCodeFix : CodeFixProvider
     /// </summary>
     /// <param name="declaration">The declaration to generate documentation for.</param>
     /// <param name="symbol">The symbol representing the declaration.</param>
+    /// <param name="indentation">The indentation to use.</param>
     /// <returns>The XML documentation stub.</returns>
-    private static string GenerateXmlDocumentationStub(SyntaxNode declaration, ISymbol symbol)
+    private static string GenerateXmlDocumentationStub(SyntaxNode declaration, ISymbol symbol, string indentation)
     {
         var builder = new StringBuilder();
 
         // Generate summary
         var summary = DocumentationGenerator.GenerateIntelligentSummary(symbol);
-        builder.AppendLine("/// <summary>");
-        builder.AppendLine($"/// {summary}");
-        builder.AppendLine("/// </summary>");
+        builder.AppendLine($"{indentation}/// <summary>");
+        builder.AppendLine($"{indentation}/// {summary}");
+        builder.AppendLine($"{indentation}/// </summary>");
 
         // Add type parameters for generic types and methods
         if (symbol is INamedTypeSymbol namedType && namedType.TypeParameters.Length > 0)
         {
             foreach (var typeParam in namedType.TypeParameters)
             {
-                builder.AppendLine($"/// <typeparam name=\"{typeParam.Name}\">The {typeParam.Name} type parameter.</typeparam>");
+                builder.AppendLine($"{indentation}/// <typeparam name=\"{typeParam.Name}\">The {typeParam.Name} type parameter.</typeparam>");
             }
         }
         else if (symbol is IMethodSymbol method && method.TypeParameters.Length > 0)
         {
             foreach (var typeParam in method.TypeParameters)
             {
-                builder.AppendLine($"/// <typeparam name=\"{typeParam.Name}\">The {typeParam.Name} type parameter.</typeparam>");
+                builder.AppendLine($"{indentation}/// <typeparam name=\"{typeParam.Name}\">The {typeParam.Name} type parameter.</typeparam>");
             }
         }
 
@@ -229,7 +257,7 @@ public sealed class MissingXmlDocsCodeFix : CodeFixProvider
             {
                 var paramName = param.Identifier.ValueText;
                 var paramDescription = DocumentationGenerator.GenerateParameterDescription(paramName);
-                builder.AppendLine($"/// <param name=\"{paramName}\">{paramDescription}</param>");
+                builder.AppendLine($"{indentation}/// <param name=\"{paramName}\">{paramDescription}</param>");
             }
 
             // Add returns for non-void methods
@@ -237,7 +265,7 @@ public sealed class MissingXmlDocsCodeFix : CodeFixProvider
                   predefined.Keyword.IsKind(SyntaxKind.VoidKeyword)))
             {
                 var returnDescription = DocumentationGenerator.GenerateReturnDescription(symbol);
-                builder.AppendLine($"/// <returns>{returnDescription}</returns>");
+                builder.AppendLine($"{indentation}/// <returns>{returnDescription}</returns>");
             }
         }
         else if (declaration is ConstructorDeclarationSyntax ctorDecl)
@@ -246,7 +274,7 @@ public sealed class MissingXmlDocsCodeFix : CodeFixProvider
             {
                 var paramName = param.Identifier.ValueText;
                 var paramDescription = DocumentationGenerator.GenerateParameterDescription(paramName);
-                builder.AppendLine($"/// <param name=\"{paramName}\">{paramDescription}</param>");
+                builder.AppendLine($"{indentation}/// <param name=\"{paramName}\">{paramDescription}</param>");
             }
         }
         else if (declaration is IndexerDeclarationSyntax indexerDecl)
@@ -255,7 +283,7 @@ public sealed class MissingXmlDocsCodeFix : CodeFixProvider
             {
                 var paramName = param.Identifier.ValueText;
                 var paramDescription = DocumentationGenerator.GenerateParameterDescription(paramName);
-                builder.AppendLine($"/// <param name=\"{paramName}\">{paramDescription}</param>");
+                builder.AppendLine($"{indentation}/// <param name=\"{paramName}\">{paramDescription}</param>");
             }
 
             builder.AppendLine("/// <returns>The value at the specified index.</returns>");
@@ -266,15 +294,25 @@ public sealed class MissingXmlDocsCodeFix : CodeFixProvider
             {
                 var paramName = param.Identifier.ValueText;
                 var paramDescription = DocumentationGenerator.GenerateParameterDescription(paramName);
-                builder.AppendLine($"/// <param name=\"{paramName}\">{paramDescription}</param>");
+                builder.AppendLine($"{indentation}/// <param name=\"{paramName}\">{paramDescription}</param>");
             }
 
             if (!(delegateDecl.ReturnType is PredefinedTypeSyntax predefined &&
                   predefined.Keyword.IsKind(SyntaxKind.VoidKeyword)))
             {
                 var returnDescription = DocumentationGenerator.GenerateReturnDescription(symbol);
-                builder.AppendLine($"/// <returns>{returnDescription}</returns>");
+                builder.AppendLine($"{indentation}/// <returns>{returnDescription}</returns>");
             }
+        }
+        else if (declaration is BaseFieldDeclarationSyntax)
+        {
+            // Fields don't need additional XML tags beyond summary
+            // The summary was already added above
+        }
+        else if (declaration is EventFieldDeclarationSyntax || declaration is EventDeclarationSyntax)
+        {
+            // Events don't need additional XML tags beyond summary
+            // The summary was already added above
         }
 
         // Add value for properties and indexers
@@ -283,7 +321,7 @@ public sealed class MissingXmlDocsCodeFix : CodeFixProvider
             if (!(declaration is IndexerDeclarationSyntax)) // Already handled above for indexers
             {
                 var valueDescription = DocumentationGenerator.GenerateValueDescription(symbol);
-                builder.AppendLine($"/// <value>{valueDescription}</value>");
+                builder.AppendLine($"{indentation}/// <value>{valueDescription}</value>");
             }
         }
 

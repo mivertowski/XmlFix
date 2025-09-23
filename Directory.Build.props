@@ -13,14 +13,16 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <Company>XmlDocGen</Company>
-    <Product>XmlDocGen</Product>
-    <Copyright>Copyright © XmlDocGen Team</Copyright>
+    <Company>Michael Ivertowski</Company>
+    <Product>XmlFix.Analyzers</Product>
+    <Copyright>Copyright © 2025 Michael Ivertowski</Copyright>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageProjectUrl>https://github.com/xmldocgen/analyzers</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/xmldocgen/analyzers</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/mivertowski/XmlFix</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/mivertowski/XmlFix</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <PackageTags>roslyn;analyzer;xml;documentation;xmldoc;codefix;refactoring;productivity;csharp;dotnet</PackageTags>
+    <Description>A Roslyn analyzer that detects missing XML documentation and provides intelligent code fixes with NLP-based documentation generation.</Description>
     <DebugType>embedded</DebugType>
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
     <IncludeSymbols>true</IncludeSymbols>

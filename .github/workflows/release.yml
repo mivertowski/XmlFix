@@ -1,0 +1,96 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to release (e.g., 1.0.0)'
+        required: true
+        type: string
+
+env:
+  DOTNET_VERSION: '9.0.x'
+  DOTNET_NOLOGO: true
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    name: Create Release
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+
+    - name: Determine version
+      id: version
+      run: |
+        if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+          VERSION="${{ github.event.inputs.version }}"
+        else
+          VERSION=${GITHUB_REF#refs/tags/v}
+        fi
+        echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+
+    - name: Restore dependencies
+      run: dotnet restore
+
+    - name: Build
+      run: dotnet build --configuration Release --no-restore
+
+    - name: Test
+      run: dotnet test --configuration Release --no-build --verbosity normal
+
+    - name: Pack
+      run: |
+        dotnet pack XmlFix.Analyzers/XmlFix.Analyzers.csproj \
+          --configuration Release \
+          --no-build \
+          --output ./artifacts \
+          -p:PackageVersion=${{ steps.version.outputs.VERSION }}
+
+    - name: Create GitHub Release
+      uses: softprops/action-gh-release@v1
+      with:
+        tag_name: v${{ steps.version.outputs.VERSION }}
+        name: Release v${{ steps.version.outputs.VERSION }}
+        body: |
+          ## XmlFix.Analyzers v${{ steps.version.outputs.VERSION }}
+
+          ### 📦 Installation
+
+          ```xml
+          <PackageReference Include="XmlFix.Analyzers" Version="${{ steps.version.outputs.VERSION }}" PrivateAssets="all" />
+          ```
+
+          ### 🎯 Features
+          - XDOC001 diagnostic for missing XML documentation
+          - Intelligent code fix with NLP-based summary generation
+          - Support for all C# 12 language features
+          - Batch fixing capabilities
+          - IDE and CLI integration
+
+          ### 📝 Full Changelog
+          See [CHANGELOG.md](https://github.com/${{ github.repository }}/blob/main/CHANGELOG.md)
+        files: ./artifacts/*.nupkg
+        draft: false
+        prerelease: false
+
+    - name: Publish to NuGet
+      if: github.event_name == 'push' && contains(github.ref, 'refs/tags/')
+      run: |
+        dotnet nuget push ./artifacts/*.nupkg \
+          --source https://api.nuget.org/v3/index.json \
+          --api-key ${{ secrets.NUGET_API_KEY }} \
+          --skip-duplicate
