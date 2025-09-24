@@ -8,7 +8,7 @@
     <IncludeBuildOutput>false</IncludeBuildOutput>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
     <PackageId>XmlFix.Analyzers</PackageId>
-    <Version>1.0.0</Version>
+    <Version>0.1.0</Version>
     <Authors>Michael Ivertowski</Authors>
     <Company>XmlFix</Company>
     <Copyright>Copyright © 2025 Michael Ivertowski</Copyright>
@@ -23,6 +23,14 @@
     <NoPackageAnalysis>true</NoPackageAnalysis>
     <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
     <IsRoslynComponent>true</IsRoslynComponent>
+    <NoWarn>CA1034;CA1815;CA1819;CA5394</NoWarn>
+
+    <!-- Code Signing Configuration -->
+    <!-- Note: Assembly signing disabled for HSM/hardware token setup -->
+    <!-- NuGet package signing will be handled by hardware token -->
+    <SignAssembly Condition="Exists('$(MSBuildThisFileDirectory)..\..\signing\XmlFix.pfx')">true</SignAssembly>
+    <AssemblyOriginatorKeyFile Condition="Exists('$(MSBuildThisFileDirectory)..\..\signing\XmlFix.pfx')">$(MSBuildThisFileDirectory)..\..\signing\XmlFix.pfx</AssemblyOriginatorKeyFile>
+    <DelaySign>false</DelaySign>
   </PropertyGroup>
 
   <ItemGroup>

@@ -91,17 +91,14 @@ public sealed class MissingXmlDocsAnalyzer : DiagnosticAnalyzer
             return;
         }
 
-        // Skip if already has documentation
+        // Skip if already has documentation (including inheritdoc)
         if (HasXmlDocumentation(symbol, context.CancellationToken))
         {
             return;
         }
 
-        // Skip if this is an override or interface implementation that should use inheritdoc
-        if (ShouldUseInheritdoc(symbol))
-        {
-            return;
-        }
+        // Don't skip interface implementations - they need either explicit docs or inheritdoc
+        // The code fix will offer inheritdoc as an option
 
         // Report diagnostic for missing documentation
         var location = GetSymbolLocation(symbol);

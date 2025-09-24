@@ -51,7 +51,21 @@ public sealed class MissingXmlDocsCodeFix : CodeFixProvider
         var semanticModel = await context.Document.GetSemanticModelAsync(context.CancellationToken).ConfigureAwait(false);
         if (semanticModel == null) return;
 
-        var symbol = semanticModel.GetDeclaredSymbol(declaration, context.CancellationToken);
+        // For fields, we need to get the symbol from the variable declarator
+        ISymbol? symbol = null;
+        if (declaration is BaseFieldDeclarationSyntax fieldDecl)
+        {
+            var variableDeclarator = fieldDecl.Declaration.Variables.FirstOrDefault();
+            if (variableDeclarator != null)
+            {
+                symbol = semanticModel.GetDeclaredSymbol(variableDeclarator, context.CancellationToken);
+            }
+        }
+        else
+        {
+            symbol = semanticModel.GetDeclaredSymbol(declaration, context.CancellationToken);
+        }
+
         if (symbol == null) return;
 
         // Register code action for adding XML documentation

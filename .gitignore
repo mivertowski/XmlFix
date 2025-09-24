@@ -112,6 +112,13 @@ FodyWeavers.xsd
 *.sarif
 *.editorconfig.bak
 StyleCop.Cache
+
+# Code signing certificates and keys - NEVER commit these!
+signing/*.pfx
+signing/*.p12
+signing/*.key
+*.pfx
+*.p12
 .claude-flow/metrics/agent-metrics.json
 .claude-flow/metrics/performance.json
 .claude-flow/metrics/system-metrics.json
@@ -122,3 +129,10 @@ StyleCop.Cache
 .hive-mind/memory.db
 .hive-mind/sessions/hive-mind-prompt-swarm-1758633417883-cqh0etikd.txt
 .hive-mind/sessions/session-1758633417892-h6ogd20ns-auto-save-1758633447488.json
+signing/6b5b9c914a20043a16f1df9a62139000.cer
+signing/6b5b9c914a20043a16f1df9a62139000.pem
+signing/CERTUM-ACR40T-SETUP.md
+SIGNING-HSM.md
+SIGNING.md
+signing/HSM-SETUP.md
+signing/token-setup.sh
