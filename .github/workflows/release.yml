@@ -1,4 +1,6 @@
 name: Release
+permissions:
+  contents: read
 
 on:
   push:
@@ -20,6 +22,9 @@ env:
 jobs:
   release:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      releases: write
     name: Create Release
 
     steps:
